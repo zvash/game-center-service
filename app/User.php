@@ -12,13 +12,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 {
     use Authenticatable, Authorizable;
 
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'email',
+        'name', 'email', 'phone'
     ];
 
     /**
@@ -29,4 +30,17 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $hidden = [
         'password',
     ];
+
+    /**
+     * @param array $userData
+     * @return User
+     */
+    public static function setup(array $userData)
+    {
+        $user = new User();
+        foreach ($userData as $attribute => $value) {
+            $user->$attribute = $value;
+        }
+        return $user;
+    }
 }
