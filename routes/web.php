@@ -14,3 +14,26 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->get('/who', function () use ($router) {
+    return "Game Center Service";
+});
+
+
+$router->group(['prefix' => 'api/v1'], function ($router) {
+
+    $router->group(['namespace' => 'Api\V1'], function ($router) {
+
+
+        $router->group(['middleware' => 'auth'], function ($router) {
+
+
+        });
+
+
+        $router->group(['middleware' => 'admin'], function ($router) {
+
+        });
+    });
+
+});

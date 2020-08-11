@@ -22,6 +22,7 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * Boot the authentication services for the application.
      *
+     * @param AuthService $authService
      * @return void
      */
     public function boot(AuthService $authService)
