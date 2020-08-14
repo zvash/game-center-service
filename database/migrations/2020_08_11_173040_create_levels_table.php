@@ -25,7 +25,8 @@ class CreateLevelsTable extends Migration
             $table->integer('win_prize');
             $table->integer('leave_prize');
             $table->timestamp('last_move_time')->index();
-            $table->string('status')->index()->default('inactive');
+            $table->string('state')->index()->default('waiting');
+            $table->string('transaction_ids')->nullable();
             $table->timestamps();
 
             $table->unique(['game_id', 'level_index']);

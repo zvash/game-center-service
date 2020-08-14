@@ -6,10 +6,9 @@
     "type": "project",
     "require": {
         "php": "^7.2.5",
-        "laravel/lumen-framework": "^7.0",
         "flipbox/lumen-generator": "^7.0",
-        "guzzlehttp/guzzle": "^6.0"
-
+        "guzzlehttp/guzzle": "^6.0",
+        "laravel/lumen-framework": "^7.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",

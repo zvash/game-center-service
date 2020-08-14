@@ -21,35 +21,39 @@ class CreateGameConfigsTable extends Migration
             $table->timestamps();
         });
 
-        GameConfig::create(['coin_price', 20]);
+        GameConfig::create(['key' => 'game_price', 'value' => 20]);
 
-        GameConfig::create(['total_levels', 7]);
+        GameConfig::create(['key' => 'total_levels', 'value' => 7]);
 
-        GameConfig::create(['win_prize.level_1', 2]);
-        GameConfig::create(['win_prize.level_2', 4]);
-        GameConfig::create(['win_prize.level_3', 8]);
-        GameConfig::create(['win_prize.level_4', 16]);
-        GameConfig::create(['win_prize.level_5', 32]);
-        GameConfig::create(['win_prize.level_6', 64]);
-        GameConfig::create(['win_prize.level_7', 128]);
+        GameConfig::create(['key' => 'win_prize.level_1', 'value' => 2]);
+        GameConfig::create(['key' => 'win_prize.level_2', 'value' => 4]);
+        GameConfig::create(['key' => 'win_prize.level_3', 'value' => 8]);
+        GameConfig::create(['key' => 'win_prize.level_4', 'value' => 16]);
+        GameConfig::create(['key' => 'win_prize.level_5', 'value' => 32]);
+        GameConfig::create(['key' => 'win_prize.level_6', 'value' => 64]);
+        GameConfig::create(['key' => 'win_prize.level_7', 'value' => 128]);
 
-        GameConfig::create(['leave_prize.level_1', 1]);
-        GameConfig::create(['leave_prize.level_2', 2]);
-        GameConfig::create(['leave_prize.level_3', 3]);
-        GameConfig::create(['leave_prize.level_4', 4]);
-        GameConfig::create(['leave_prize.level_5', 5]);
-        GameConfig::create(['leave_prize.level_6', 6]);
-        GameConfig::create(['leave_prize.level_7', 7]);
+        GameConfig::create(['key' => 'leave_prize.level_1', 'value' => 1]);
+        GameConfig::create(['key' => 'leave_prize.level_2', 'value' => 2]);
+        GameConfig::create(['key' => 'leave_prize.level_3', 'value' => 3]);
+        GameConfig::create(['key' => 'leave_prize.level_4', 'value' => 4]);
+        GameConfig::create(['key' => 'leave_prize.level_5', 'value' => 5]);
+        GameConfig::create(['key' => 'leave_prize.level_6', 'value' => 6]);
+        GameConfig::create(['key' => 'leave_prize.level_7', 'value' => 7]);
 
-        GameConfig::create(['reveal_price', 50]);
+        GameConfig::create(['key' => 'prize_currency', 'value' => 'EUR']);
 
-        GameConfig::create(['box_count.level_1', 2]);
-        GameConfig::create(['box_count.level_2', 3]);
-        GameConfig::create(['box_count.level_3', 4]);
-        GameConfig::create(['box_count.level_4', 5]);
-        GameConfig::create(['box_count.level_5', 6]);
-        GameConfig::create(['box_count.level_6', 7]);
-        GameConfig::create(['box_count.level_7', 8]);
+        GameConfig::create(['key' => 'reveal_price', 'value' => 50]);
+        GameConfig::create(['key' => 'reveal_min_boxes', 'value' => 3]);
+
+        GameConfig::create(['key' => 'box_count.level_1', 'value' => 2]);
+        GameConfig::create(['key' => 'box_count.level_2', 'value' => 3]);
+        GameConfig::create(['key' => 'box_count.level_3', 'value' => 4]);
+        GameConfig::create(['key' => 'box_count.level_4', 'value' => 5]);
+        GameConfig::create(['key' => 'box_count.level_5', 'value' => 6]);
+        GameConfig::create(['key' => 'box_count.level_6', 'value' => 7]);
+        GameConfig::create(['key' => 'box_count.level_7', 'value' => 8]);
+
 
     }
 

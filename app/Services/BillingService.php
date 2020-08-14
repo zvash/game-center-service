@@ -37,9 +37,36 @@ class BillingService
         );
     }
 
+    /**
+     * @param array $transactions
+     * @return array
+     */
     public function createTransactions(array $transactions)
     {
-        
+        $payload = [
+            'transactions' => $transactions
+        ];
+
+        try {
+            $response = $this->client->request(
+                'POST',
+                $this->getCreateTransactionsUrlSuffix(),
+                [
+                    'json' => $payload,
+                    'headers' => $this->headers
+                ]
+            );
+            if ($response->getStatusCode() == 200) {
+                $contents = json_decode($response->getBody()->getContents(), 1);
+                return ['data' => $contents['data'], 'status' => 200];
+            }
+            return ['data' => ['json' => $response->getBody()->getContents()], 'status' => $response->getStatusCode()];
+        } catch (GuzzleException $exception) {
+            if ($exception->getCode() == 401) {
+                return ['data' => ['json' => $exception->getResponse()->getBody()->getContents()], 'status' => $exception->getCode()];
+            }
+            return ['data' => $exception->getResponse()->getBody()->getContents(), 'status' => $exception->getCode()];
+        }
     }
 
     /**
@@ -84,13 +111,13 @@ class BillingService
 
     /**
      * @param int $userId
-     * @param int $amount
+     * @param float $amount
      * @param string $currency
      * @param string $sourceType
      * @param int $sourceId
      * @return array
      */
-    public function withdrawMoney(int $userId, int $amount, string $currency, string $sourceType, int $sourceId)
+    public function withdrawMoney(int $userId, float $amount, string $currency, string $sourceType, int $sourceId)
     {
         return $this->transactionMaker(
             $userId,
@@ -105,13 +132,13 @@ class BillingService
 
     /**
      * @param int $userId
-     * @param int $amount
+     * @param float $amount
      * @param string $currency
      * @param string $sourceType
      * @param int $sourceId
      * @return array
      */
-    public function depositMoney(int $userId, int $amount, string $currency, string $sourceType, int $sourceId)
+    public function depositMoney(int $userId, float $amount, string $currency, string $sourceType, int $sourceId)
     {
         return $this->transactionMaker(
             $userId,
@@ -124,7 +151,18 @@ class BillingService
         );
     }
 
-    private function transactionMaker(int $userId, string $action, int $amount, string $currency, string $sourceType, int $sourceId, string $description = '', array $extraParams = [])
+    /**
+     * @param int $userId
+     * @param string $action
+     * @param float $amount
+     * @param string $currency
+     * @param string $sourceType
+     * @param int $sourceId
+     * @param string $description
+     * @param array $extraParams
+     * @return array
+     */
+    private function transactionMaker(int $userId, string $action, float $amount, string $currency, string $sourceType, int $sourceId, string $description = '', array $extraParams = [])
     {
         $transaction = [
             'action' => $action,
@@ -137,6 +175,29 @@ class BillingService
             'extra_params' => json_encode($extraParams)
         ];
         return $transaction;
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    private function getHeadersFromRequest(Request $request)
+    {
+        $headers = $request->headers->all();
+        $formattedHeaders = [];
+        foreach ($headers as $key => $record) {
+            if (in_array(strtolower($key), ['content-length'])) {
+                continue;
+            }
+            if (is_array($record)) {
+                $value = $record[0];
+            } else {
+                $value = $record;
+            }
+            $key = implode('-', array_map('ucfirst', explode('-', $key)));
+            $formattedHeaders[$key] = $value;
+        }
+        return $formattedHeaders;
     }
 
     private function getCreateTransactionsUrlSuffix()
