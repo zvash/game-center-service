@@ -160,4 +160,31 @@ class GameRepository
         $config = GameConfig::all()->pluck('value', 'key')->toArray();
         return $game->getGameFlow($config);
     }
+
+    /**
+     * @param array $games
+     * @param BillingService $billingService
+     * @return mixed
+     * @throws ServiceException
+     */
+    public function getGamesBalances(array $games, BillingService $billingService)
+    {
+        $sources['games'] = [];
+        foreach ($games as $game) {
+            $sources['games'][] = $game['id'];
+        }
+        if ($sources['games']) {
+            $response = $billingService->getSourcesBalances($sources);
+            if ($response['status'] == 200) {
+                return $response['data'];
+            }
+        } else {
+            return [];
+        }
+        throw new ServiceException('Could not get balances.', [
+            'message' => 'Could not get balances.',
+            'data' => $response['data'],
+            'code' => $response['status']
+        ]);
+    }
 }

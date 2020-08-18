@@ -152,6 +152,38 @@ class BillingService
     }
 
     /**
+     * @param array $sources
+     * @return array
+     */
+    public function getSourcesBalances(array $sources)
+    {
+        $payload = ['sources' => []];
+        foreach ($sources as $sourceType => $ids) {
+            $source = [];
+            $source['source_type'] = $sourceType;
+            $source['ids'] = $ids;
+            $payload['sources'][] = $source;
+        }
+
+        try {
+            $response = $this->client->request(
+                'POST',
+                $this->getSourcesBalance(),
+                [
+                    'json' => $payload,
+                    'headers' => $this->headers
+                ]
+            );
+            if ($response->getStatusCode() == 200) {
+                $contents = json_decode($response->getBody()->getContents(), 1);
+                return ['data' => $contents['data'], 'status' => 200];
+            }
+        } catch (GuzzleException $exception) {
+            return ['data' => $exception->getResponse()->getBody()->getContents(), 'status' => $exception->getCode()];
+        }
+    }
+
+    /**
      * @param int $userId
      * @param string $action
      * @param float $amount
@@ -200,8 +232,19 @@ class BillingService
         return $formattedHeaders;
     }
 
+    /**
+     * @return string
+     */
     private function getCreateTransactionsUrlSuffix()
     {
         return 'api/v1/transactions/create';
+    }
+
+    /**
+     * @return string
+     */
+    private function getSourcesBalance()
+    {
+        return 'api/v1/transactions/sources/balance';
     }
 }

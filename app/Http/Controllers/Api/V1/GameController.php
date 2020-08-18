@@ -183,4 +183,37 @@ class GameController extends Controller
         }
         return $this->failMessage('Content not found.', 404);
     }
+
+    /**
+     * @param Request $request
+     * @param GameRepository $gameRepository
+     * @param BillingService $billingService
+     * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
+     */
+    public function summary(Request $request, GameRepository $gameRepository, BillingService $billingService)
+    {
+        $user = Auth::user();
+        if ($user) {
+            $games = Game::where('user_id', $user->id)
+                ->where('is_active', false)
+                ->orderBy('id', 'DESC')
+                ->paginate(10)
+                ->toArray();
+            if ($games) {
+                try {
+                    $balances = $gameRepository->getGamesBalances($games['data'], $billingService);
+                    foreach ($games['data'] as $index => $game) {
+                        if (isset($balances['games'][$game['id']])) {
+                            $games['data'][$index]['balances'] = $balances['games'][$game['id']];
+                        }
+                    }
+                    return $this->success($games);
+                } catch (ServiceException $e) {
+                    return $this->failData($e->getData(), 400);
+                }
+            }
+            return $this->failMessage('Content not found.', 404);
+        }
+        return $this->failMessage('Content not found.', 404);
+    }
 }

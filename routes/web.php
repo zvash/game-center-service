@@ -27,6 +27,8 @@ $router->group(['prefix' => 'api/v1'], function ($router) {
 
         $router->group(['middleware' => 'auth'], function ($router) {
 
+            $router->get('games/all/summary', 'GameController@summary');
+
             $router->post('games/create', 'GameController@create');
             $router->post('games/{gameId}/answer', 'GameController@answer');
             $router->post('games/{gameId}/reveal', 'GameController@reveal');

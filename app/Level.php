@@ -129,10 +129,11 @@ class Level extends Model
         if ($revealableCount >= $config['reveal_min_boxes']) {
             $amount = $config['reveal_price'];
             $userId = $this->game->user_id;
-            $transactions = [$billingService->withdrawCoin($userId, $amount, 'levels', $this->id)];
+            $transactions = [$billingService->withdrawCoin($userId, $amount, 'games', $this->game->id)];
             $result = $billingService->createTransactions($transactions);
             if ($result['status'] == 200 && $result['data']) {
                 $transactionId = $result['data'][0]['id'];
+                $this->game->addTransaction($transactionId);
                 $this->addTransaction($transactionId);
                 $randomIndex = mt_rand(0, count($revealable) - 1);
                 $revealedBox = $revealable[$randomIndex];

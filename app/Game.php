@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int current_level_index
  * @property string currency
  * @property float paid_prize
+ * @property bool is_active
  */
 class Game extends Model
 {
@@ -108,7 +109,7 @@ class Game extends Model
      * @param int $transactionId
      * @return $this
      */
-    private function addTransaction(int $transactionId)
+    public function addTransaction(int $transactionId)
     {
         $currentIds = $this->transaction_ids ? explode(',', $this->transaction_ids) : [];
         $currentIds[] = $transactionId;
@@ -233,6 +234,7 @@ class Game extends Model
         if ($activeLevel) {
             $activeLevel = $activeLevel->collect();
             $this->state = 'collected';
+            $this->is_active = false;
             $this->save();
             $this->payPrize($activeLevel->win_prize, $billingService);
             return $this;
@@ -262,6 +264,7 @@ class Game extends Model
             $this->addTransaction($transactionId);
             $this->paid_prize = $amount;
             $this->state = 'collected';
+            $this->is_active = false;
             $this->save();
             return $this;
         } else {
