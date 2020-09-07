@@ -39,6 +39,7 @@ class GameRepository
                 ->start()
                 ->payGameCoins($config, $billingService)
                 ->getGameFlow($config);
+            dd($config);
             DB::commit();
             return $gameFlow;
         } catch (\Exception $exception) {
