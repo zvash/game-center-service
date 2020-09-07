@@ -92,6 +92,7 @@ class Game extends Model
             return $this;
         } else if (array_key_exists('json', $result['data'])) {
             $error = json_decode($result['data']['json'], 1);
+            dd($error);
             $error = $error['errors']['data'];
             throw new InsufficientPossessionException(
                 'Not enough coins to start a new game',

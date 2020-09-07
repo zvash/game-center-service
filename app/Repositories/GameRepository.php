@@ -35,7 +35,6 @@ class GameRepository
                 'currency' => $currency,
                 'total_levels' => $config['total_levels'],
             ]);
-            dd($config);
             $gameFlow = $game->createLevels($config, $exchangeRate)
                 ->start()
                 ->payGameCoins($config, $billingService)
