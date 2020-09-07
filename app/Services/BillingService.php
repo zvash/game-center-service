@@ -46,7 +46,7 @@ class BillingService
         $payload = [
             'transactions' => $transactions
         ];
-
+dd($payload);
         try {
             $response = $this->client->request(
                 'POST',
