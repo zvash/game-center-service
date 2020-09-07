@@ -91,7 +91,6 @@ class Game extends Model
             $this->addTransaction($transactionId);
             return $this;
         } else if (array_key_exists('json', $result['data'])) {
-            dd($result);
             $error = json_decode($result['data']['json'], 1);
             $error = $error['errors']['data'];
             throw new InsufficientPossessionException(
