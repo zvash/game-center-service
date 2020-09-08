@@ -204,7 +204,12 @@ class GameController extends Controller
                     $balances = $gameRepository->getGamesBalances($games['data'], $billingService);
                     foreach ($games['data'] as $index => $game) {
                         if (isset($balances['games'][$game['id']])) {
-                            $games['data'][$index]['balances'] = $balances['games'][$game['id']];
+                            foreach ($balances['games'][$game['id']] as $currency => $amount) {
+                                $games['data'][$index]['balances'][] = [
+                                    'currency' => $currency,
+                                    'amount' => $amount
+                                ];
+                            }
                         }
                     }
                     return $this->success($games);
