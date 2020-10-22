@@ -73,11 +73,13 @@ class Level extends Model
             );
         });
 
+        $revealedBoxes = array_values($revealedBoxes);
+
         $level = [];
         $level['index'] = $this->level_index;
-        $level['possible_answers'] = array_filter($allBoxes, function ($item) use ($revealedBoxes) {
+        $level['possible_answers'] = array_values(array_filter($allBoxes, function ($item) use ($revealedBoxes) {
             return !in_array($item, $revealedBoxes);
-        });
+        }));
         $level['allow_reveal'] = $this->state == 'active' && $revealableCount >= $config['reveal_min_boxes'];
         $level['reveal_price'] = $this->reveal_price;
         $level['revealed_boxes'] = $revealedBoxes;
