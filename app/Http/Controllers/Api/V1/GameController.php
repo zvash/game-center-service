@@ -6,6 +6,7 @@ use App\Exceptions\ServiceException;
 use App\Game;
 use App\GameConfig;
 use App\Http\Controllers\Controller;
+use App\Level;
 use App\Repositories\EuroExchangeRateRepository;
 use App\Repositories\GameRepository;
 use App\Services\BillingService;
@@ -220,5 +221,16 @@ class GameController extends Controller
             return $this->failMessage('Content not found.', 404);
         }
         return $this->failMessage('Content not found.', 404);
+    }
+
+    /**
+     * @param Request $request
+     * @param int $gameId
+     * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
+     */
+    public function cheat(Request $request, int $gameId)
+    {
+        $answers = Level::where('game_id', $gameId)->pluck('winner_box', 'level_index')->toArray();
+        return $this->success($answers);
     }
 }
