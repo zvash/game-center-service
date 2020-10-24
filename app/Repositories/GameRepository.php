@@ -48,6 +48,45 @@ class GameRepository
     }
 
     /**
+     * @param string $targetCurrency
+     * @param BillingService $billingService
+     * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @return array
+     * @throws ServiceException
+     */
+    public function getDepositStatistics(string $targetCurrency, BillingService $billingService, EuroExchangeRateRepository $euroExchangeRateRepository)
+    {
+        $response = $billingService->getDepositStatistics('games', 'money');
+        if ($response['status'] == 200) {
+            $deposits = $response['data'];
+            $totalPaid = 0;
+            foreach ($deposits['sums'] as $currency => $amount) {
+                if ($currency == $targetCurrency) {
+                    $totalPaid += $amount;
+                } else {
+                    try {
+                        $exchangeRate = $euroExchangeRateRepository->exchangeRate($currency, $targetCurrency);
+                    } catch (\Exception $e) {
+                        $exchangeRate = 0;
+                    }
+                    $totalPaid += $amount * $exchangeRate;
+                }
+            }
+            return [
+                'total_paid' => ceil($totalPaid),
+                'currency' => $targetCurrency,
+                'average' => ceil($totalPaid / $deposits['users_count']),
+                'last_update' => $deposits['last_update']
+            ];
+        }
+        throw new ServiceException('Could not get deposit statistics.', [
+            'message' => 'Could not get deposit statistics.',
+            'data' => $response['data'],
+            'code' => $response['status']
+        ]);
+    }
+
+    /**
      * @param int $gameId
      * @return array
      * @throws \Exception

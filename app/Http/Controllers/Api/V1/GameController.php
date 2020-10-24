@@ -247,6 +247,27 @@ class GameController extends Controller
 
     /**
      * @param Request $request
+     * @param GameRepository $gameRepository
+     * @param BillingService $billingService
+     * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
+     */
+    public function statistics(Request $request, GameRepository $gameRepository, BillingService $billingService, EuroExchangeRateRepository $euroExchangeRateRepository)
+    {
+        $user = Auth::user();
+        if ($user) {
+            try {
+                $deposits = $gameRepository->getDepositStatistics($user->currency, $billingService, $euroExchangeRateRepository);
+                return $this->success($deposits);
+            } catch (ServiceException $e) {
+                return $this->failData($e->getData(), 400);
+            }
+        }
+        return $this->failMessage('Content not found.', 404);
+    }
+
+    /**
+     * @param Request $request
      * @param int $gameId
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */

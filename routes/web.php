@@ -29,13 +29,15 @@ $router->group(['prefix' => 'api/v1'], function ($router) {
 
             $router->get('games/all/summary', 'GameController@summary');
 
+            $router->get('games/statistics', 'GameController@statistics');
             $router->post('games/create', 'GameController@create');
             $router->post('games/{gameId}/answer', 'GameController@answer');
             $router->post('games/{gameId}/reveal', 'GameController@reveal');
             $router->post('games/{gameId}/collect', 'GameController@collect');
             $router->post('games/{gameId}/pass', 'GameController@pass');
-            $router->get('games/{gameId}', 'GameController@get');
             $router->get('games/{gameId}/prizes', 'GameController@prizes');
+            $router->get('games/{gameId}', 'GameController@get');
+
 
 
             $router->get('games/{gameId}/cheat', 'GameController@cheat');

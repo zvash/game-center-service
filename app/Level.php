@@ -87,6 +87,12 @@ class Level extends Model
         $level['state'] = $this->state;
         $level['playable'] = $this->state == 'active';
         $level['payable'] = $this->state == 'can-collect';
+        $nextLevel = $this->getNext();
+        if ($nextLevel) {
+            $level['next_level_win_prize'] = $nextLevel->win_prize;
+        } else {
+            $level['next_level_win_prize'] = null;
+        }
         return $level;
     }
 

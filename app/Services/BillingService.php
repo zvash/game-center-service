@@ -184,6 +184,30 @@ class BillingService
     }
 
     /**
+     * @param string $sourceType
+     * @param string $currencyType
+     * @return array
+     */
+    public function getDepositStatistics(string $sourceType, string $currencyType)
+    {
+        try {
+            $response = $this->client->request(
+                'GET',
+                $this->getDepositStatisticsUrl($sourceType, $currencyType),
+                [
+                    'headers' => $this->headers
+                ]
+            );
+            if ($response->getStatusCode() == 200) {
+                $contents = json_decode($response->getBody()->getContents(), 1);
+                return ['data' => $contents['data'], 'status' => 200];
+            }
+        } catch (GuzzleException $exception) {
+            return ['data' => $exception->getResponse()->getBody()->getContents(), 'status' => $exception->getCode()];
+        }
+    }
+
+    /**
      * @param int $userId
      * @param string $action
      * @param float $amount
@@ -246,5 +270,15 @@ class BillingService
     private function getSourcesBalance()
     {
         return 'api/v1/transactions/sources/balance';
+    }
+
+    /**
+     * @param string $sourceType
+     * @param string $currencyType
+     * @return string
+     */
+    private function getDepositStatisticsUrl(string $sourceType, string $currencyType)
+    {
+        return "api/v1/transactions/{$sourceType}/deposits/{$currencyType}";
     }
 }
