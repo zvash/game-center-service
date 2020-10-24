@@ -130,7 +130,7 @@ class Game extends Model
         $game['id'] = $this->id;
         $game['state'] = $this->state;
         $game['user_id'] = $this->user_id;
-        $game['total_levels'] = $this->total_levels;
+        $game['total_levels'] = $this->total_levels * 1;
         $game['current_level'] = $this->current_level_index;
         $game['currency'] = $this->currency;
         $game['revealed'] = $revealed;
@@ -149,7 +149,7 @@ class Game extends Model
                 $game['end_reason'] = $lastLevel->state;
             }
         }
-        $game['level'] = [];
+        $game['level'] = null;
         $activeLevel = $this->levels()->whereIn('state', ['can-collect', 'active'])->first();
         if ($activeLevel) {
             $game['level'] = $activeLevel->getLevel($config);
@@ -214,7 +214,7 @@ class Game extends Model
         $activeLevel = $this->levels()->where('state', 'can-collect')->first();
         if ($activeLevel) {
             $activeLevel->passLevel();
-            return $this;
+            return $this->refresh();
         } else {
             throw new ActiveLevelNotFoundException('Game has no passable level', [
                 'message' => 'Game has no passable level',

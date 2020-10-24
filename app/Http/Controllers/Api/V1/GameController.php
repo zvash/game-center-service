@@ -226,6 +226,28 @@ class GameController extends Controller
     /**
      * @param Request $request
      * @param int $gameId
+     * @param GameRepository $gameRepository
+     * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
+     */
+    public function prizes(Request $request, int $gameId, GameRepository $gameRepository)
+    {
+        $user = Auth::user();
+        if ($user) {
+            $game = Game::where('user_id', $user->id)
+                ->where('id', $gameId)
+                ->first();
+            if ($game) {
+                $prizes = $gameRepository->gamePrizes($game);
+                return $this->success($prizes);
+            }
+            return $this->failMessage('Content not found.', 404);
+        }
+        return $this->failMessage('Content not found.', 404);
+    }
+
+    /**
+     * @param Request $request
+     * @param int $gameId
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
     public function cheat(Request $request, int $gameId)

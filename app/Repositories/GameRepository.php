@@ -187,4 +187,25 @@ class GameRepository
             'code' => $response['status']
         ]);
     }
+
+    /**
+     * @param Game $game
+     * @return array
+     */
+    public function gamePrizes(Game $game)
+    {
+        $gamePrizes = [
+            'game_id' => $game->id,
+            'currency' => $game->currency,
+            'prizes' => []
+        ];
+        $levels = $game->levels->toArray();
+        foreach ($levels as $level) {
+            $gamePrizes['prizes'][] = [
+                'level_index' => $level['level_index'],
+                'win_prize' => $level['win_prize'],
+            ];
+        }
+        return $gamePrizes;
+    }
 }

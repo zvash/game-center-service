@@ -35,6 +35,7 @@ $router->group(['prefix' => 'api/v1'], function ($router) {
             $router->post('games/{gameId}/collect', 'GameController@collect');
             $router->post('games/{gameId}/pass', 'GameController@pass');
             $router->get('games/{gameId}', 'GameController@get');
+            $router->get('games/{gameId}/prizes', 'GameController@prizes');
 
 
             $router->get('games/{gameId}/cheat', 'GameController@cheat');
