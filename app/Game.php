@@ -282,10 +282,11 @@ class Game extends Model
      */
     private function expiredStatus(array $config)
     {
+        $this->refresh();
         $updatedAt = $this->updated_at;
         $secondsToExpire = $config['seconds_to_play'] - $updatedAt->diffInSeconds(Carbon::now());
         $game['is_expired'] =  $secondsToExpire < 0 ;
-        $game['expires_at'] = $updatedAt->addSeconds($config['seconds_to_play']);
+        $game['expires_at'] = $updatedAt->addSeconds($config['seconds_to_play'])->timestamp;
         $game['seconds_to_expire'] = $game['is_expired'] ? 0 : $secondsToExpire;
         return $game;
     }

@@ -149,7 +149,7 @@ class GameRepository
     /**
      * @param Game $game
      * @param BillingService $billingService
-     * @return integer
+     * @return array
      * @throws \Exception
      */
     public function revealOne(Game $game, BillingService $billingService)
