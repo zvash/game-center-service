@@ -278,6 +278,7 @@ class Game extends Model
 
     /**
      * @param array $config
+     * @return mixed
      */
     private function expiredStatus(array $config)
     {
@@ -286,5 +287,6 @@ class Game extends Model
         $game['is_expired'] =  $secondsToExpire > 0 ;
         $game['expires_at'] = $updatedAt->addSeconds($config['seconds_to_play']);
         $game['seconds_to_expire'] = $game['is_expired'] ? 0 : $secondsToExpire;
+        return $game;
     }
 }
