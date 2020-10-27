@@ -148,6 +148,7 @@ class Level extends Model
                 unset($revealable[$randomIndex]);
                 $this->revealable_boxes = implode(',', $revealable);
                 $this->save();
+                $this->game->touch();
                 return $revealedBox;
             } else if (array_key_exists('json', $result['data'])) {
                 $error = json_decode($result['data']['json'], 1);
@@ -186,6 +187,7 @@ class Level extends Model
             $nextLevel ? 'can-collect' : 'won'
             : 'lost';
         $this->save();
+        $this->game->touch();
         return $this;
     }
 
@@ -198,6 +200,7 @@ class Level extends Model
         $this->confirmLevelIsCollectable();
         $this->state = 'passed';
         $this->save();
+        $this->game->touch();
         $nextLevel = $this->getNext();
         if ($nextLevel) {
             $nextLevel->activate();
@@ -214,6 +217,7 @@ class Level extends Model
         $this->confirmLevelIsCollectable();
         $this->state = 'collected';
         $this->save();
+        $this->game->touch();
         return $this;
     }
 

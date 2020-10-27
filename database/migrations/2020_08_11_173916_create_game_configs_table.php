@@ -54,6 +54,8 @@ class CreateGameConfigsTable extends Migration
         GameConfig::create(['key' => 'box_count.level_6', 'value' => 7]);
         GameConfig::create(['key' => 'box_count.level_7', 'value' => 8]);
 
+        GameConfig::create(['key' => 'seconds_to_play', 'value' => 60]);
+
 
     }
 

@@ -6,6 +6,7 @@ use App\Exceptions\ActiveLevelNotFoundException;
 use App\Exceptions\InsufficientPossessionException;
 use App\Exceptions\ServiceException;
 use App\Services\BillingService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string currency
  * @property float paid_prize
  * @property bool is_active
+ * @property \Illuminate\Support\Carbon updated_at
  */
 class Game extends Model
 {
@@ -154,6 +156,7 @@ class Game extends Model
         if ($activeLevel) {
             $game['level'] = $activeLevel->getLevel($config);
         }
+        $game = $game + $this->expiredStatus($config);
         return $game;
     }
 
@@ -271,5 +274,17 @@ class Game extends Model
         } else {
             throw new ServiceException('Failed to create transaction on billing service', []);
         }
+    }
+
+    /**
+     * @param array $config
+     */
+    private function expiredStatus(array $config)
+    {
+        $updatedAt = $this->updated_at;
+        $secondsToExpire = $config['seconds_to_play'] - $updatedAt->diffInSeconds(Carbon::now());
+        $game['is_expired'] =  $secondsToExpire > 0 ;
+        $game['expires_at'] = $updatedAt->addSeconds($config['seconds_to_play']);
+        $game['seconds_to_expire'] = $game['is_expired'] ? 0 : $secondsToExpire;
     }
 }
