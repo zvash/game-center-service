@@ -48,6 +48,65 @@ class GameRepository
     }
 
     /**
+     * @param string $currency
+     * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @return mixed
+     */
+    public function getGamePrizes(string $currency, EuroExchangeRateRepository $euroExchangeRateRepository)
+    {
+        $config = GameConfig::all()->pluck('value', 'key')->toArray();
+        try {
+            if ($config['prize_currency'] != $currency) {
+                $exchangeRate = $euroExchangeRateRepository->exchangeRate($config['prize_currency'], $currency);
+            } else {
+                $exchangeRate = 1;
+            }
+        } catch (\Exception $exception) {
+            $exchangeRate = 1;
+            $currency = 'EUR';
+        }
+
+        $result['currency'] = $currency;
+        $result['prizes'] = [];
+        for ($levelIndex = 1; $levelIndex <= $config['total_levels'] * 1; $levelIndex++) {
+            $result['prizes'][] = [
+                'level_index' => $levelIndex,
+                'win_prize' => intval(round($config['win_prize.level_' . $levelIndex] * $exchangeRate)),
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $currency
+     * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @return array
+     */
+    public function allWinnersPayouts(string $currency, EuroExchangeRateRepository $euroExchangeRateRepository)
+    {
+        $wonGames = Game::where('state', 'collected')->whereRaw('current_level_index = total_levels')->get();
+        $totalWinners = $wonGames->count();
+        $totalPayouts = 0;
+        foreach ($wonGames as $game) {
+            try {
+                if ($game->currency != $currency) {
+                    $exchangeRate = $euroExchangeRateRepository->exchangeRate($game->currency, $currency);
+                } else {
+                    $exchangeRate = 1;
+                }
+            } catch (\Exception $exception) {
+                $exchangeRate = 1;
+            }
+            $totalPayouts += intval(round($game->paid_prize * $exchangeRate));
+        }
+        return [
+            'currency' => $currency,
+            'total_payouts' => $totalPayouts,
+            'total_winners' => $totalWinners
+        ];
+    }
+
+    /**
      * @param string $targetCurrency
      * @param BillingService $billingService
      * @param EuroExchangeRateRepository $euroExchangeRateRepository

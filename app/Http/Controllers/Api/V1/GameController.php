@@ -201,6 +201,13 @@ class GameController extends Controller
                 ->paginate(10)
                 ->toArray();
             if ($games) {
+                $config = GameConfig::all()->pluck('value', 'key')->toArray();
+                $gameFlows = [];
+                foreach ($games['data'] as $gameData) {
+                    $game = Game::find($gameData['id']);
+                    $gameFlows[] = $game->getGameFlow($config);
+                }
+                $games['data'] = $gameFlows;
                 try {
                     $balances = $gameRepository->getGamesBalances($games['data'], $billingService);
                     foreach ($games['data'] as $index => $game) {
@@ -241,6 +248,40 @@ class GameController extends Controller
                 return $this->success($prizes);
             }
             return $this->failMessage('Content not found.', 404);
+        }
+        return $this->failMessage('Content not found.', 404);
+    }
+
+    /**
+     * @param Request $request
+     * @param GameRepository $gameRepository
+     * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
+     */
+    public function prizesFromConfig(Request $request, GameRepository $gameRepository, EuroExchangeRateRepository $euroExchangeRateRepository)
+    {
+        $user = Auth::user();
+        if ($user) {
+            $currency = $user->currency;
+            $prizes = $gameRepository->getGamePrizes($currency, $euroExchangeRateRepository);
+            return $this->success($prizes);
+        }
+        return $this->failMessage('Content not found.', 404);
+    }
+
+    /**
+     * @param Request $request
+     * @param GameRepository $gameRepository
+     * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
+     */
+    public function winners(Request $request, GameRepository $gameRepository, EuroExchangeRateRepository $euroExchangeRateRepository)
+    {
+        $user = Auth::user();
+        if ($user) {
+            $currency = $user->currency;
+            $payouts = $gameRepository->allWinnersPayouts($currency, $euroExchangeRateRepository);
+            return $this->success($payouts);
         }
         return $this->failMessage('Content not found.', 404);
     }

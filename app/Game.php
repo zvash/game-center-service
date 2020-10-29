@@ -148,7 +148,7 @@ class Game extends Model
             if (!$lastLevel) {
                 $game['end_reason'] = '';
             } else {
-                $game['end_reason'] = $lastLevel->state;
+                $game['end_reason'] = in_array($lastLevel->state, ['won', 'collected']) ? 'won' : 'lost';
             }
         }
         $game['level'] = null;
