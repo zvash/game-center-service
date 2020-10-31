@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\GameIsExpiredException;
 use App\Exceptions\ServiceException;
 use App\Game;
 use App\GameConfig;
@@ -64,10 +65,16 @@ class GameController extends Controller
                 ->first();
             if ($game) {
                 try {
+                    $gameRepository->expireGameIfNeeded($game, $billingService);
                     $gameFlow = $gameRepository->proceedWithAnswer($game, $request->get('answer'), $billingService);
                     return $this->success($gameFlow);
                 } catch (ServiceException $exception) {
                     return $this->failData($exception->getData(), 400);
+                } catch (GameIsExpiredException $exception) {
+                    $config = GameConfig::all()->pluck('value', 'key')->toArray();
+                    $game->refresh();
+                    $gameFlow = $game->getGameFlow($config);
+                    return $this->success($gameFlow);
                 } catch (\Exception $e) {
                     return $this->failMessage($e->getMessage(), 400);
                 }
@@ -93,10 +100,16 @@ class GameController extends Controller
                 ->first();
             if ($game) {
                 try {
+                    $gameRepository->expireGameIfNeeded($game, $billingService);
                     $gameFlow = $gameRepository->revealOne($game, $billingService);
                     return $this->success($gameFlow);
                 } catch (ServiceException $exception) {
                     return $this->failData($exception->getData(), 400);
+                } catch (GameIsExpiredException $exception) {
+                    $config = GameConfig::all()->pluck('value', 'key')->toArray();
+                    $game->refresh();
+                    $gameFlow = $game->getGameFlow($config);
+                    return $this->success($gameFlow);
                 } catch (\Exception $e) {
                     return $this->failMessage($e->getMessage(), 400);
                 }
@@ -122,10 +135,16 @@ class GameController extends Controller
                 ->first();
             if ($game) {
                 try {
+                    $gameRepository->expireGameIfNeeded($game, $billingService);
                     $gameFlow = $gameRepository->collectPrize($game, $billingService);
                     return $this->success($gameFlow);
                 } catch (ServiceException $exception) {
                     return $this->failData($exception->getData(), 400);
+                } catch (GameIsExpiredException $exception) {
+                    $config = GameConfig::all()->pluck('value', 'key')->toArray();
+                    $game->refresh();
+                    $gameFlow = $game->getGameFlow($config);
+                    return $this->success($gameFlow);
                 } catch (\Exception $e) {
                     return $this->failMessage($e->getMessage(), 400);
                 }
@@ -139,9 +158,10 @@ class GameController extends Controller
      * @param Request $request
      * @param int $gameId
      * @param GameRepository $gameRepository
+     * @param BillingService $billingService
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
-    public function pass(Request $request, int $gameId, GameRepository $gameRepository)
+    public function pass(Request $request, int $gameId, GameRepository $gameRepository, BillingService $billingService)
     {
         $user = Auth::user();
         if ($user) {
@@ -150,10 +170,16 @@ class GameController extends Controller
                 ->first();
             if ($game) {
                 try {
+                    $gameRepository->expireGameIfNeeded($game, $billingService);
                     $gameFlow = $gameRepository->passLevelToNext($game);
                     return $this->success($gameFlow);
                 } catch (ServiceException $exception) {
                     return $this->failData($exception->getData(), 400);
+                } catch (GameIsExpiredException $exception) {
+                    $config = GameConfig::all()->pluck('value', 'key')->toArray();
+                    $game->refresh();
+                    $gameFlow = $game->getGameFlow($config);
+                    return $this->success($gameFlow);
                 } catch (\Exception $e) {
                     return $this->failMessage($e->getMessage(), 400);
                 }
@@ -166,9 +192,13 @@ class GameController extends Controller
     /**
      * @param Request $request
      * @param int $gameId
+     * @param GameRepository $gameRepository
+     * @param BillingService $billingService
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
+     * @throws ServiceException
+     * @throws \App\Exceptions\ActiveLevelNotFoundException
      */
-    public function get(Request $request, int $gameId)
+    public function get(Request $request, int $gameId, GameRepository $gameRepository, BillingService $billingService)
     {
         $user = Auth::user();
         if ($user) {
@@ -177,6 +207,11 @@ class GameController extends Controller
                 ->first();
             if ($game) {
                 $config = GameConfig::all()->pluck('value', 'key')->toArray();
+                try {
+                    $gameRepository->expireGameIfNeeded($game, $billingService);
+                } catch (GameIsExpiredException $exception) {
+                    $game->refresh();
+                }
                 $gameFlow = $game->getGameFlow($config);
                 return $this->success($gameFlow);
             }

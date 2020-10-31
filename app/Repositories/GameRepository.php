@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 
+use App\Exceptions\GameIsExpiredException;
 use App\Exceptions\InsufficientPossessionException;
 use App\Exceptions\ServiceException;
 use App\Game;
@@ -305,5 +306,31 @@ class GameRepository
             ];
         }
         return $gamePrizes;
+    }
+
+    /**
+     * @param Game $game
+     * @param BillingService $billingService
+     * @return Game
+     * @throws GameIsExpiredException
+     * @throws ServiceException
+     * @throws \App\Exceptions\ActiveLevelNotFoundException
+     */
+    public function expireGameIfNeeded(Game $game, BillingService $billingService)
+    {
+        if ($game->is_expired) {
+            throw new GameIsExpiredException("Game Is Expired");
+        }
+        $config = GameConfig::all()->pluck('value', 'key')->toArray();
+        $expiredStatus = $game->expiredStatus($config);
+        if ($expiredStatus['is_expired']) {
+            $game->timestamps = false;
+            $game->is_expired = true;
+            $game->save();
+            $game->expireGame($billingService);
+            $game->timestamps = true;
+            throw new GameIsExpiredException("Game Is Expired");
+        }
+        return $game;
     }
 }

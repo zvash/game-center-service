@@ -192,6 +192,16 @@ class Level extends Model
     }
 
     /**
+     * @return $this
+     */
+    public function updateStateByExpiration()
+    {
+        $this->state = 'lost';
+        $this->save();
+        return $this;
+    }
+
+    /**
      * @return null|Level
      * @throws LevelIsNotActiveException
      */

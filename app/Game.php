@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property float paid_prize
  * @property bool is_active
  * @property \Illuminate\Support\Carbon updated_at
+ * @property bool is_expired
  */
 class Game extends Model
 {
@@ -209,6 +210,28 @@ class Game extends Model
     }
 
     /**
+     * @param BillingService $billingService
+     * @return $this
+     * @throws ActiveLevelNotFoundException
+     * @throws ServiceException
+     */
+    public function expireGame(BillingService $billingService)
+    {
+        $currentLevel = $this->levels()->whereIn('state', ['active', 'can-collect'])->first();
+        if ($currentLevel) {
+            $currentLevel->updateStateByExpiration();
+            $prizeToPay = $currentLevel->leave_prize;
+            $this->payPrize($prizeToPay, $billingService);
+            return $this;
+        } else {
+            throw new ActiveLevelNotFoundException('Game has no active level', [
+                'message' => 'Game has no active level',
+                'game_id' => $this->id
+            ]);
+        }
+    }
+
+    /**
      * @return Game
      * @throws ActiveLevelNotFoundException
      */
@@ -280,7 +303,7 @@ class Game extends Model
      * @param array $config
      * @return mixed
      */
-    private function expiredStatus(array $config)
+    public function expiredStatus(array $config)
     {
         $this->refresh();
         $updatedAt = $this->updated_at;
