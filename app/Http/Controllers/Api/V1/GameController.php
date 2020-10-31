@@ -215,7 +215,7 @@ class GameController extends Controller
                             foreach ($balances['games'][$game['id']] as $currency => $amount) {
                                 $games['data'][$index]['balances'][] = [
                                     'currency' => $currency,
-                                    'amount' => $amount
+                                    'amount' => $amount * 1
                                 ];
                             }
                         }
