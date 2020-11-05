@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 
+use App\Exceptions\ActiveLevelNotFoundException;
 use App\Exceptions\GameIsExpiredException;
 use App\Exceptions\InsufficientPossessionException;
 use App\Exceptions\ServiceException;
@@ -327,7 +328,11 @@ class GameRepository
             $game->timestamps = false;
             $game->is_expired = true;
             $game->save();
-            $game->expireGame($billingService);
+            try {
+                $game->expireGame($billingService);
+            } catch (ActiveLevelNotFoundException $e) {
+                //No Active Level. Pass.
+            }
             $game->timestamps = true;
             throw new GameIsExpiredException("Game Is Expired");
         }
