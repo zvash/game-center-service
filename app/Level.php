@@ -80,7 +80,7 @@ class Level extends Model
         $level['possible_answers'] = array_values(array_filter($allBoxes, function ($item) use ($revealedBoxes) {
             return !in_array($item, $revealedBoxes);
         }));
-        $level['allow_reveal'] = $this->state == 'active' && $revealableCount >= $config['reveal_min_boxes'];
+        $level['allow_reveal'] = $this->state == 'active' && !$this->isLastLevel($config) && $revealableCount >= $config['reveal_min_boxes'];
         $level['reveal_price'] = $this->reveal_price;
         $level['revealed_boxes'] = $revealedBoxes;
         $level['win_prize'] = $this->win_prize;
@@ -134,7 +134,7 @@ class Level extends Model
     {
         $revealable = explode(',', $this->revealable_boxes);
         $revealableCount = count($revealable) + 1;
-        if ($revealableCount >= $config['reveal_min_boxes']) {
+        if (!$this->isLastLevel($config) && $revealableCount >= $config['reveal_min_boxes']) {
             $amount = $config['reveal_price'];
             $userId = $this->game->user_id;
             $transactions = [$billingService->withdrawCoin($userId, $amount, 'games', $this->game->id)];
@@ -165,9 +165,10 @@ class Level extends Model
             }
         } else {
             throw new LevelIsNotRevealableException('No box to reveal.', [
-                'message' => 'Not enough boxes to reveal one.',
+                'message' => 'Cannot reveal any boxes.',
                 'remained_boxes_count' => $revealableCount,
-                'reveal_limit' => $config['reveal_min_boxes']
+                'reveal_limit' => $config['reveal_min_boxes'],
+                'last_level' => $this->isLastLevel($config)
             ]);
         }
     }
@@ -271,4 +272,12 @@ class Level extends Model
         return $this;
     }
 
+    /**
+     * @param array $config
+     * @return bool
+     */
+    private function isLastLevel(array $config)
+    {
+        return $this->level_index == $config['total_levels'];
+    }
 }
