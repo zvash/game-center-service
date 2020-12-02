@@ -347,8 +347,20 @@ class GameController extends Controller
      * @param int $gameId
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
-    public function cheat(Request $request, int $gameId)
+    public function cheat(Request $request, $gameId)
     {
+        if ($gameId == 'last') {
+            $user = Auth::user();
+            $game = Game::where('user_id', $user->id)->orderBy('id', 'DESC')->first();
+            if (!$game) {
+                $game = Game::orderBy('id', 'DESC')->first();
+            }
+            if ($game) {
+                $gameId = $game->id;
+            } else {
+                $gameId = 0;
+            }
+        }
         $answers = Level::where('game_id', $gameId)->pluck('winner_box', 'level_index')->toArray();
         return $this->success($answers);
     }
