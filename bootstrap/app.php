@@ -61,6 +61,7 @@ $app->singleton(
 
 $app->configure('app');
 $app->configure('cors');
+$app->configure('countries');
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +76,7 @@ $app->configure('cors');
 
 $app->middleware([
     Fruitcake\Cors\HandleCors::class,
+    App\Http\Middleware\AttachCountry::class,
 ]);
 
 $app->routeMiddleware([

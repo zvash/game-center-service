@@ -24,16 +24,15 @@ $router->group(['prefix' => 'api/v1'], function ($router) {
 
     $router->group(['namespace' => 'Api\V1'], function ($router) {
 
+        $router->get('games/winners', 'GameController@winners');
+        $router->get('games/prizes', 'GameController@prizesFromConfig');
+        $router->get('games/statistics', 'GameController@statistics');
 
         $router->group(['middleware' => 'auth'], function ($router) {
 
             $router->get('games/all/summary', 'GameController@summary');
 
-            $router->get('games/winners', 'GameController@winners');
-
-            $router->get('games/statistics', 'GameController@statistics');
             $router->post('games/create', 'GameController@create');
-            $router->get('games/prizes', 'GameController@prizesFromConfig');
             $router->post('games/{gameId}/answer', 'GameController@answer');
             $router->post('games/{gameId}/reveal', 'GameController@reveal');
             $router->post('games/{gameId}/collect', 'GameController@collect');

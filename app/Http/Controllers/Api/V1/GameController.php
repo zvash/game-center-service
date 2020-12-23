@@ -8,6 +8,7 @@ use App\Game;
 use App\GameConfig;
 use App\Http\Controllers\Controller;
 use App\Level;
+use App\Repositories\CountryRepository;
 use App\Repositories\EuroExchangeRateRepository;
 use App\Repositories\GameRepository;
 use App\Services\BillingService;
@@ -291,34 +292,28 @@ class GameController extends Controller
      * @param Request $request
      * @param GameRepository $gameRepository
      * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @param CountryRepository $countryRepository
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
-    public function prizesFromConfig(Request $request, GameRepository $gameRepository, EuroExchangeRateRepository $euroExchangeRateRepository)
+    public function prizesFromConfig(Request $request, GameRepository $gameRepository, EuroExchangeRateRepository $euroExchangeRateRepository, CountryRepository $countryRepository)
     {
-        $user = Auth::user();
-        if ($user) {
-            $currency = $user->currency;
-            $prizes = $gameRepository->getGamePrizes($currency, $euroExchangeRateRepository);
-            return $this->success($prizes);
-        }
-        return $this->failMessage('Content not found.', 404);
+        $currency = $this->getCurrency($request, $countryRepository);
+        $prizes = $gameRepository->getGamePrizes($currency, $euroExchangeRateRepository);
+        return $this->success($prizes);
     }
 
     /**
      * @param Request $request
      * @param GameRepository $gameRepository
      * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @param CountryRepository $countryRepository
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
-    public function winners(Request $request, GameRepository $gameRepository, EuroExchangeRateRepository $euroExchangeRateRepository)
+    public function winners(Request $request, GameRepository $gameRepository, EuroExchangeRateRepository $euroExchangeRateRepository, CountryRepository $countryRepository)
     {
-        $user = Auth::user();
-        if ($user) {
-            $currency = $user->currency;
-            $payouts = $gameRepository->allWinnersPayouts($currency, $euroExchangeRateRepository);
-            return $this->success($payouts);
-        }
-        return $this->failMessage('Content not found.', 404);
+        $currency = $this->getCurrency($request, $countryRepository);
+        $payouts = $gameRepository->allWinnersPayouts($currency, $euroExchangeRateRepository);
+        return $this->success($payouts);
     }
 
     /**
@@ -326,20 +321,18 @@ class GameController extends Controller
      * @param GameRepository $gameRepository
      * @param BillingService $billingService
      * @param EuroExchangeRateRepository $euroExchangeRateRepository
+     * @param CountryRepository $countryRepository
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
-    public function statistics(Request $request, GameRepository $gameRepository, BillingService $billingService, EuroExchangeRateRepository $euroExchangeRateRepository)
+    public function statistics(Request $request, GameRepository $gameRepository, BillingService $billingService, EuroExchangeRateRepository $euroExchangeRateRepository, CountryRepository $countryRepository)
     {
-        $user = Auth::user();
-        if ($user) {
-            try {
-                $deposits = $gameRepository->getDepositStatistics($user->currency, $billingService, $euroExchangeRateRepository);
-                return $this->success($deposits);
-            } catch (ServiceException $e) {
-                return $this->failData($e->getData(), 400);
-            }
+        $currency = $this->getCurrency($request, $countryRepository);
+        try {
+            $deposits = $gameRepository->getDepositStatistics($currency, $billingService, $euroExchangeRateRepository);
+            return $this->success($deposits);
+        } catch (ServiceException $e) {
+            return $this->failData($e->getData(), 400);
         }
-        return $this->failMessage('Content not found.', 404);
     }
 
     /**
@@ -363,5 +356,20 @@ class GameController extends Controller
         }
         $answers = Level::where('game_id', $gameId)->pluck('winner_box', 'level_index')->toArray();
         return $this->success($answers);
+    }
+
+    /**
+     * @param Request $request
+     * @param CountryRepository $repository
+     * @return string
+     */
+    private function getCurrency(Request $request, CountryRepository $repository)
+    {
+        $user = Auth::user();
+        if ($user) {
+            return $user->currency;
+        } else {
+            return $repository->getCurrency($request->attributes->get('country', 'ARE'));
+        }
     }
 }
