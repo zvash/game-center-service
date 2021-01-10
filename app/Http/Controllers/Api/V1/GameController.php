@@ -11,6 +11,7 @@ use App\Level;
 use App\Repositories\CountryRepository;
 use App\Repositories\EuroExchangeRateRepository;
 use App\Repositories\GameRepository;
+use App\Services\AuthService;
 use App\Services\BillingService;
 use App\Traits\ResponseMaker;
 use Illuminate\Http\Request;
@@ -55,9 +56,10 @@ class GameController extends Controller
      * @param int $gameId
      * @param GameRepository $gameRepository
      * @param BillingService $billingService
+     * @param AuthService $authService
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
-    public function answer(Request $request, int $gameId, GameRepository $gameRepository, BillingService $billingService)
+    public function answer(Request $request, int $gameId, GameRepository $gameRepository, BillingService $billingService, AuthService $authService)
     {
         $user = Auth::user();
         if ($user) {
@@ -67,7 +69,7 @@ class GameController extends Controller
             if ($game) {
                 try {
                     $gameRepository->expireGameIfNeeded($game, $billingService);
-                    $gameFlow = $gameRepository->proceedWithAnswer($game, $request->get('answer'), $billingService);
+                    $gameFlow = $gameRepository->proceedWithAnswer($game, $request->get('answer'), $billingService, $authService);
                     return $this->success($gameFlow);
                 } catch (ServiceException $exception) {
                     return $this->failData($exception->getData(), 400);

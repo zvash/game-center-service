@@ -62,6 +62,30 @@ class AuthService
     }
 
     /**
+     * @param int $userId
+     * @return array
+     */
+    public function getUserById(int $userId)
+    {
+        $headers = $this->headers + ['Service-Token' => env('AUTH_SERVICE_TOKEN', '')];
+        try {
+            $response = $this->client->request(
+                'GET',
+                $this->getUserByIdUrl($userId),
+                [
+                    'headers' => $headers
+                ]
+            );
+            if ($response->getStatusCode() == 200) {
+                $contents = json_decode($response->getBody()->getContents(), 1);
+                return ['data' => $contents['data'], 'status' => 200];
+            }
+        } catch (GuzzleException $exception) {
+            return ['data' => $exception->getResponse()->getBody()->getContents(), 'status' => $exception->getCode()];
+        }
+    }
+
+    /**
      * @param Request $request
      * @return mixed
      */
@@ -90,5 +114,14 @@ class AuthService
     private function getAuthenticateUrlSuffix()
     {
         return 'api/v1/authenticate';
+    }
+
+    /**
+     * @param int $userId
+     * @return string
+     */
+    private function getUserByIdUrl(int $userId)
+    {
+        return "api/v1/users/$userId";
     }
 }

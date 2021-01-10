@@ -2,9 +2,11 @@
 
 namespace App;
 
+use App\Events\UserHasWonTheGame;
 use App\Exceptions\ActiveLevelNotFoundException;
 use App\Exceptions\InsufficientPossessionException;
 use App\Exceptions\ServiceException;
+use App\Services\AuthService;
 use App\Services\BillingService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -184,12 +186,14 @@ class Game extends Model
     /**
      * @param int $answer
      * @param BillingService $billingService
+     * @param AuthService $authService
      * @return Game
      * @throws ActiveLevelNotFoundException
      * @throws ServiceException
      */
-    public function answer(int $answer, BillingService $billingService)
+    public function answer(int $answer, BillingService $billingService, AuthService $authService)
     {
+        $userWon = false;
         $activeLevel = $this->levels()->where('state', 'active')->first();
         if ($activeLevel) {
             $activeLevel = $activeLevel->updateStateByAnswer($answer);
@@ -198,8 +202,12 @@ class Game extends Model
                 $prizeToPay = $activeLevel->leave_prize;
             } else if ($activeLevel->state == 'won') {
                 $prizeToPay = $activeLevel->win_prize;
+                $userWon = true;
             }
             $this->payPrize($prizeToPay, $billingService);
+            if ($userWon) {
+                event(new UserHasWonTheGame($this->user_id, $authService, $billingService));
+            }
             return $this;
         } else {
             throw new ActiveLevelNotFoundException('Game has no active level', [

@@ -10,6 +10,7 @@ use App\Exceptions\ServiceException;
 use App\Game;
 use App\GameConfig;
 use App\Level;
+use App\Services\AuthService;
 use App\Services\BillingService;
 use Illuminate\Support\Facades\DB;
 
@@ -190,15 +191,16 @@ class GameRepository
      * @param Game $game
      * @param int $answer
      * @param BillingService $billingService
+     * @param AuthService $authService
      * @return mixed
      * @throws \Exception
      */
-    public function proceedWithAnswer(Game $game, int $answer, BillingService $billingService)
+    public function proceedWithAnswer(Game $game, int $answer, BillingService $billingService, AuthService $authService)
     {
         try {
             DB::beginTransaction();
             $config = GameConfig::all()->pluck('value', 'key')->toArray();
-            $game = $game->answer($answer, $billingService);
+            $game = $game->answer($answer, $billingService, $authService);
             DB::commit();
             return $game->getGameFlow($config);
         } catch (\Exception $exception) {
