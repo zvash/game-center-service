@@ -28,6 +28,8 @@ $router->group(['prefix' => 'api/v1'], function ($router) {
         $router->get('games/prizes', 'GameController@prizesFromConfig');
         $router->get('games/statistics', 'GameController@statistics');
 
+        $router->get('social-proofs/all', 'SocialProofController@all');
+
         $router->group(['middleware' => 'auth'], function ($router) {
 
             $router->get('games/all/summary', 'GameController@summary');
