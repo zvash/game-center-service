@@ -47,8 +47,8 @@ class Game extends Model
 
         for ($levelIndex = 1; $levelIndex <= $config['total_levels'] * 1; $levelIndex++) {
             $possibleChoices = range(1, $config['box_count.level_' . $levelIndex]);
-            $winnerIndex = mt_rand(0, $config['box_count.level_' . $levelIndex] - 1);
-            $winnerBox = 1;//$possibleChoices[$winnerIndex];
+            $winnerIndex = 0;//mt_rand(0, $config['box_count.level_' . $levelIndex] - 1);
+            $winnerBox = $possibleChoices[$winnerIndex];
             unset($possibleChoices[$winnerIndex]);
             Level::create([
                 'game_id' => $this->id,
