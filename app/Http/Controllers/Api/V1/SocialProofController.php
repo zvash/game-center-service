@@ -39,6 +39,7 @@ class SocialProofController extends Controller
                     'play_count' => $proof['play_count'],
                     'won_amount' => $proof['won_amount'],
                     'currency' => $proof['currency'],
+                    'country' => $users[$proof['user_id']]['country'],
                     'comment' => $proof['comment'],
                 ];
             }
