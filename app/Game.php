@@ -228,7 +228,9 @@ class Game extends Model
         $currentLevel = $this->levels()->whereIn('state', ['active', 'can-collect'])->first();
         if ($currentLevel) {
             $currentLevel->updateStateByExpiration();
-            $prizeToPay = $currentLevel->leave_prize;
+            $prizeToPay = $currentLevel->winner_box == $currentLevel->chosen_box
+                ? $currentLevel->win_prize
+                : $currentLevel->leave_prize;
             $this->payPrize($prizeToPay, $billingService);
             return $this;
         } else {
@@ -316,7 +318,7 @@ class Game extends Model
         $this->refresh();
         $updatedAt = $this->updated_at;
         $secondsToExpire = $config['seconds_to_play'] - $updatedAt->diffInSeconds(Carbon::now());
-        $game['is_expired'] =  $secondsToExpire < 0 ;
+        $game['is_expired'] = $secondsToExpire < 0;
         $game['expires_at'] = $updatedAt->addSeconds($config['seconds_to_play'])->timestamp;
         $game['seconds_to_expire'] = $game['is_expired'] ? 0 : $secondsToExpire;
         return $game;
