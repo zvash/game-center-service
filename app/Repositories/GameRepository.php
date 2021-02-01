@@ -105,7 +105,8 @@ class GameRepository
         return [
             'currency' => $currency,
             'total_payouts' => $totalPayouts,
-            'total_winners' => $totalWinners
+            'total_winners' => $totalWinners,
+            'total_payouts_rounded' => $this->numberPresentation($totalPayouts)
         ];
     }
 
@@ -339,5 +340,38 @@ class GameRepository
             throw new GameIsExpiredException("Game Is Expired");
         }
         return $game;
+    }
+
+    /**
+     * @param string $currentSuffix
+     * @return mixed|string
+     */
+    private function getNextSuffix(string $currentSuffix)
+    {
+        $suffixMap = [
+            "" => "K",
+            "K" => "M",
+            "M" => "B"
+        ];
+        if (array_key_exists($currentSuffix, $suffixMap)) {
+            return $suffixMap[$currentSuffix];
+        }
+        return "N/A";
+    }
+
+    private function numberPresentation(float $number, string $suffix = "")
+    {
+
+        if ($number < 1000) {
+            if ($number == intval($number)) {
+                return intval($number) . $suffix;
+            } else {
+                return $number . $suffix;
+            }
+
+        }
+        $nextSuffix = $this->getNextSuffix($suffix);
+        $number = round($number / 1000, 1);
+        return $this->numberPresentation($number, $nextSuffix);
     }
 }
